@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pakar Diagnosa Penyakit Pencernaan | RS Example</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen font-poppins medical-bg-pattern">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12 animate-fade-in">
+            <div class="header-badge">
+                <i class="fas fa-hospital mr-2"></i>
+                <span>Sistem Pakar Rumah Sakit</span>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-800 mb-3">Sistem Pakar Diagnosa Penyakit Pencernaan</h1>
+            <p class="text-gray-600 max-w-3xl mx-auto">
+                Sistem ini dikembangkan untuk membantu diagnosis awal penyakit sistem pencernaan menggunakan 
+                metode Dempster-Shafer, yang memungkinkan penanganan ketidakpastian dalam analisis gejala pasien.
+            </p>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
+                    <i class="fas fa-brain text-blue-500 text-2xl mb-2"></i>
+                    <h3 class="font-semibold text-gray-800">Sistem Pakar</h3>
+                    <p class="text-sm text-gray-600">Menggunakan pengetahuan ahli medis dalam analisis</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
+                    <i class="fas fa-calculator text-blue-500 text-2xl mb-2"></i>
+                    <h3 class="font-semibold text-gray-800">Dempster-Shafer</h3>
+                    <p class="text-sm text-gray-600">Metode perhitungan dengan tingkat akurasi tinggi</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-100">
+                    <i class="fas fa-chart-line text-blue-500 text-2xl mb-2"></i>
+                    <h3 class="font-semibold text-gray-800">Hasil Akurat</h3>
+                    <p class="text-sm text-gray-600">Diagnosis berdasarkan kombinasi gejala</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-6xl mx-auto">
+            <!-- Information Alert -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 rounded-r-xl">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">Petunjuk Penggunaan</h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                            <p>1. Pilih gejala-gejala yang Anda alami pada daftar di bawah</p>
+                            <p>2. Sistem akan menganalisis kombinasi gejala menggunakan metode Dempster-Shafer</p>
+                            <p>3. Hasil diagnosis akan menampilkan kemungkinan penyakit beserta tingkat keyakinannya</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mass Function Information -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-table text-purple-600"></i>
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800">Nilai Mass Function</h2>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Basis pengetahuan sistem
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-2 text-left">Gejala</th>
+                                <th class="px-4 py-2">m(D1)</th>
+                                <th class="px-4 py-2">m(D2)</th>
+                                <th class="px-4 py-2">m(D3)</th>
+                                <th class="px-4 py-2">m(D1,D2)</th>
+                                <th class="px-4 py-2">m(D1,D3)</th>
+                                <th class="px-4 py-2">m(D2,D3)</th>
+                                <th class="px-4 py-2">m(θ)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mass-function-table">
+                            <!-- Mass function values will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Symptoms Selection -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+                <div class="mb-8">
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-clipboard-list text-blue-600"></i>
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800">Pilih Gejala yang Dialami</h2>
+                    </div>
+                    <p class="text-gray-600 mb-6">
+                        Silakan pilih gejala-gejala yang Anda alami. Sistem akan menganalisis menggunakan 
+                        metode Dempster-Shafer untuk memberikan diagnosis yang akurat.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="symptoms-container">
+                        <div class="symptom-card">
+                            <input type="checkbox" id="G1" class="symptom-checkbox">
+                            <label for="G1" class="symptom-label">
+                                <span class="symptom-icon"><i class="fas fa-check"></i></span>
+                                <div class="symptom-info">
+                                    <span class="symptom-text">Nyeri perut bagian atas</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="symptom-card">
+                            <input type="checkbox" id="G2" class="symptom-checkbox">
+                            <label for="G2" class="symptom-label">
+                                <span class="symptom-icon"><i class="fas fa-check"></i></span>
+                                <div class="symptom-info">
+                                    <span class="symptom-text">Mual dan muntah</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="symptom-card">
+                            <input type="checkbox" id="G3" class="symptom-checkbox">
+                            <label for="G3" class="symptom-label">
+                                <span class="symptom-icon"><i class="fas fa-check"></i></span>
+                                <div class="symptom-info">
+                                    <span class="symptom-text">Perut kembung</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="symptom-card">
+                            <input type="checkbox" id="G4" class="symptom-checkbox">
+                            <label for="G4" class="symptom-label">
+                                <span class="symptom-icon"><i class="fas fa-check"></i></span>
+                                <div class="symptom-info">
+                                    <span class="symptom-text">Diare</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="symptom-card">
+                            <input type="checkbox" id="G5" class="symptom-checkbox">
+                            <label for="G5" class="symptom-label">
+                                <span class="symptom-icon"><i class="fas fa-check"></i></span>
+                                <div class="symptom-info">
+                                    <span class="symptom-text">Penurunan berat badan</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col space-y-4">
+                    <button id="diagnose" class="diagnose-button">
+                        <span class="button-content">
+                            <i class="fas fa-stethoscope mr-2"></i>
+                            Diagnosa Penyakit
+                        </span>
+                    </button>
+
+                    <button id="reset" class="reset-button">
+                        <span class="button-content">
+                            <i class="fas fa-undo mr-2"></i>
+                            Reset Gejala
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="result" class="hidden space-y-8">
+                <!-- Main Diagnosis -->
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-notes-medical text-green-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800">Hasil Diagnosa</h3>
+                    </div>
+                    <div id="diagnosis-result" class="mb-6"></div>
+                    <button id="showCalculations" class="text-indigo-600 hover:text-indigo-800 transition-colors flex items-center text-sm font-medium">
+                        <i class="fas fa-calculator mr-2"></i>
+                        Lihat Perhitungan Dempster-Shafer
+                        <i class="fas fa-chevron-right ml-2 text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Belief and Plausibility Values -->
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-percentage text-blue-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800">Nilai Belief & Plausibility</h3>
+                    </div>
+                    <div id="belief-values"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for detailed calculations -->
+    <div id="calculationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-xl font-semibold text-gray-800">Detail Perhitungan Dempster-Shafer</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="detailed-calculations" class="space-y-6">
+                    <!-- Detailed calculations will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alertModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 max-w-sm w-full mx-4 shadow-xl transform transition-all">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Peringatan</h3>
+                <p class="text-sm text-gray-500 mb-6">Silakan pilih minimal satu gejala untuk melakukan diagnosis.</p>
+                <button id="closeAlert" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm transition-colors">
+                    Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add this before the closing body tag -->
+    <div class="loading-container">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-progress">
+                <div class="loading-bar"></div>
+            </div>
+            <div class="loading-text">Menganalisis gejala...</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

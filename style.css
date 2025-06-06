@@ -1,0 +1,727 @@
+/* Font settings */
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Medical Theme Colors */
+:root {
+    --primary-color: #4F46E5;
+    --secondary-color: #3B82F6;
+    --accent-color: #10B981;
+    --danger-color: #EF4444;
+    --light-bg: #F3F4F6;
+    --medical-blue: #0EA5E9;
+    --medical-green: #059669;
+}
+
+/* Medical Icons and Decorations */
+.medical-bg-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0v60M60 30H0' stroke='%23E2E8F0' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-size: 30px 30px;
+}
+
+/* Header styling */
+.header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #E0F2FE 0%, #DBEAFE 100%);
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+    border: 2px solid #BFDBFE;
+}
+
+.header-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.1);
+}
+
+.header-badge i {
+    font-size: 1.25rem;
+    color: var(--medical-blue);
+}
+
+.header-badge span {
+    font-weight: 600;
+    color: var(--medical-blue);
+}
+
+/* Table styling */
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 1rem;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+    background: #f9fafb;
+    font-weight: 600;
+    text-align: center;
+    color: #374151;
+}
+
+td {
+    text-align: center;
+}
+
+/* Symptom cards styling */
+.symptom-card {
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 1rem;
+}
+
+.symptom-checkbox {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.symptom-label {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem;
+    background: white;
+    border: 2px solid #E2E8F0;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.symptom-label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: #4F46E5;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.symptom-checkbox:checked + .symptom-label::before {
+    opacity: 1;
+}
+
+.symptom-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    margin-right: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.symptom-icon::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #4F46E5;
+    border-radius: 6px;
+    transform: scale(0);
+    transition: transform 0.2s ease;
+}
+
+.symptom-checkbox:checked + .symptom-label .symptom-icon::after {
+    transform: scale(1);
+}
+
+.symptom-icon i {
+    color: white;
+    font-size: 0.875rem;
+    z-index: 1;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+}
+
+.symptom-checkbox:checked + .symptom-label .symptom-icon i {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.symptom-info {
+    flex: 1;
+}
+
+.symptom-code {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #EEF2FF;
+    border-radius: 9999px;
+    color: #4F46E5;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    transition: all 0.3s ease;
+}
+
+.symptom-checkbox:checked + .symptom-label .symptom-code {
+    background: #4F46E5;
+    color: white;
+}
+
+.symptom-text {
+    color: #4b5563;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.symptom-checkbox:checked + .symptom-label .symptom-text {
+    color: #1F2937;
+}
+
+/* Checkbox checked states */
+.symptom-checkbox:checked + .symptom-label {
+    border-color: var(--medical-blue);
+    background: #F0F9FF;
+    animation: pulseGlow 2s infinite;
+}
+
+.symptom-checkbox:checked + .symptom-label .symptom-icon {
+    background: #4F46E5;
+    border-color: #4F46E5;
+}
+
+.symptom-checkbox:checked + .symptom-label .symptom-icon i {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Hover effects */
+.symptom-label:hover {
+    border-color: #818CF8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Diagnose button styling */
+.diagnose-button {
+    width: 100%;
+    background: linear-gradient(135deg, var(--medical-blue) 0%, var(--medical-green) 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.diagnose-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(14, 165, 233, 0.2);
+}
+
+/* Reset button styling */
+.reset-button {
+    width: 100%;
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.reset-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(239, 68, 68, 0.2);
+}
+
+.button-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Results section styling */
+.calculation-details {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.calculation-step {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid var(--medical-blue);
+    transition: all 0.3s ease;
+}
+
+.calculation-step h4 {
+    color: #4F46E5;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.step-detail {
+    padding-left: 1rem;
+    border-left: 2px solid #E0E7FF;
+    margin: 0.5rem 0;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Mass function table */
+#mass-function-table tr:hover {
+    background-color: #F8FAFC;
+}
+
+#mass-function-table td {
+    transition: all 0.3s ease;
+}
+
+/* Calculation steps styling */
+.calculation-group {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.calculation-group-title {
+    color: #4F46E5;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.calculation-item {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.calculation-result {
+    border-top: 2px dashed #E0E7FF;
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.result-value {
+    font-weight: 600;
+    color: #4F46E5;
+}
+
+/* Belief and Plausibility cards */
+.belief-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.belief-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.belief-title {
+    font-weight: 600;
+    color: #1F2937;
+    margin-bottom: 0.5rem;
+}
+
+.belief-value {
+    color: #4F46E5;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.plausibility-value {
+    color: #7C3AED;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Calculation button styling */
+#showCalculations {
+    padding: 0.5rem 0;
+    border-radius: 0.375rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+#showCalculations:hover {
+    padding-left: 0.5rem;
+}
+
+#showCalculations:hover i.fa-chevron-right {
+    transform: translateX(4px);
+}
+
+#showCalculations i.fa-chevron-right {
+    transition: transform 0.3s ease;
+}
+
+/* Modal styling */
+#calculationModal {
+    backdrop-filter: blur(4px);
+}
+
+#calculationModal .modal-content {
+    background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border-radius: 1rem;
+    max-width: 64rem;
+    width: 95%;
+    margin: 2rem auto;
+    position: relative;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#calculationModal .modal-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 50;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#calculationModal .modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+#calculationModal .modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+#calculationModal .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#calculationModal .modal-body::-webkit-scrollbar-thumb {
+    background: #c7d2fe;
+    border-radius: 4px;
+}
+
+#calculationModal .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #818cf8;
+}
+
+#closeModal {
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 0.375rem;
+}
+
+#closeModal:hover {
+    background: #f3f4f6;
+}
+
+/* Calculation steps in modal */
+.calculation-step {
+    transition: all 0.3s ease;
+    margin-bottom: 2rem;
+}
+
+.calculation-step:last-child {
+    margin-bottom: 0;
+}
+
+.calculation-step:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.combination-details table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.combination-details th,
+.combination-details td {
+    border: 1px solid #e5e7eb;
+    padding: 0.75rem 1rem;
+    text-align: left;
+}
+
+.combination-details th {
+    background-color: #f9fafb;
+    font-weight: 600;
+}
+
+.final-values {
+    border-top: 2px dashed #e5e7eb;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+}
+
+/* Loading Animation */
+.loading-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.loading-content {
+    text-align: center;
+}
+
+.loading-progress {
+    width: 200px;
+    height: 6px;
+    background: #E2E8F0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 20px auto;
+}
+
+.loading-bar {
+    width: 0%;
+    height: 100%;
+    margin-right: 10;
+    background: linear-gradient(90deg, var(--medical-blue), var(--medical-green));
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.loading-text {
+    color: var(--medical-blue);
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+/* Enhanced Result Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(14, 165, 233, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
+    }
+}
+
+/* Result Cards Animation */
+#diagnosis-result, #belief-values {
+    animation: slideIn 0.6s ease-out forwards;
+}
+
+/* Enhanced Diagnosis Result Styling */
+#diagnosis-result {
+    position: relative;
+}
+
+.diagnosis-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+.diagnosis-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #4F46E5, #10B981);
+}
+
+.diagnosis-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.diagnosis-icon {
+    width: 48px;
+    height: 48px;
+    background: #EEF2FF;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+}
+
+.diagnosis-icon i {
+    font-size: 1.5rem;
+    color: #4F46E5;
+}
+
+.diagnosis-title {
+    flex: 1;
+}
+
+.diagnosis-title h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1F2937;
+    margin-bottom: 0.25rem;
+}
+
+.diagnosis-title p {
+    color: #6B7280;
+    font-size: 0.875rem;
+}
+
+.diagnosis-result-value {
+    text-align: center;
+    padding: 2rem 0;
+    border-top: 1px solid #E5E7EB;
+    border-bottom: 1px solid #E5E7EB;
+    margin: 1.5rem 0;
+}
+
+.diagnosis-disease {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #4F46E5;
+    margin-bottom: 0.5rem;
+}
+
+.diagnosis-confidence {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: #F3F4F6;
+    border-radius: 9999px;
+    color: #374151;
+    font-weight: 500;
+}
+
+.diagnosis-confidence i {
+    color: #10B981;
+    margin-right: 0.5rem;
+}
+/* Enhanced Loading Animation */
+.loading-container {
+    backdrop-filter: blur(8px);
+}
+
+.loading-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #E2E8F0;
+    border-top-color: #4F46E5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+.loading-progress {
+    width: 240px;
+    height: 6px;
+    background: #E2E8F0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 1rem auto;
+}
+
+.loading-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4F46E5, #10B981);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.loading-text {
+    color: #4F46E5;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
