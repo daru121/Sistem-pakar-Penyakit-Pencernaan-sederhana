@@ -176,7 +176,7 @@ function performDiagnosis() {
         let result = null;
         let calculationSteps = [];
 
-        // Perform calculations
+        // Perform calculations with correct mass function numbering
         selectedSymptoms.forEach((symptom, index) => {
             if (index === 0) {
                 result = { ...massValues[symptom] };
@@ -186,11 +186,24 @@ function performDiagnosis() {
                     values: { ...result }
                 });
             } else {
-                result = combineEvidence(result, massValues[symptom]);
+                const prevResult = { ...result };
+                result = combineEvidence(prevResult, massValues[symptom]);
+                
+                // Calculate the correct step number based on the pattern
+                let stepNumber;
+                if (selectedSymptoms.length <= 2) {
+                    stepNumber = index + 1;
+                } else {
+                    // For 3+ symptoms: steps will be 3, 5, 7, 9
+                    stepNumber = index * 2 + 1;
+                }
+
                 calculationSteps.push({
-                    step: index + 1,
+                    step: stepNumber,
                     description: `Kombinasi dengan gejala ${symptom}`,
-                    values: { ...result }
+                    values: { ...result },
+                    prevValues: prevResult,
+                    currentValues: massValues[symptom]
                 });
             }
         });
@@ -212,7 +225,7 @@ function performDiagnosis() {
         resultSection.style.transition = 'all 0.6s ease-out';
         resultSection.style.opacity = '1';
         resultSection.style.transform = 'translateY(0)';
-    }, 2000); // 2 second delay for demonstration
+    }, 2000);
 }
 
 function combineEvidence(mass1, mass2) {
@@ -234,29 +247,33 @@ function combineEvidence(mass1, mass2) {
     }
 
     // Normalize results
-    const normalizationFactor = 1 / (1 - conflictSum);
-    for (const key in result) {
-        result[key] *= normalizationFactor;
+    if (conflictSum !== 1) {  // Add check to prevent division by zero
+        const normalizationFactor = 1 / (1 - conflictSum);
+        for (const key in result) {
+            result[key] *= normalizationFactor;
+        }
     }
 
     return result;
 }
 
 function getIntersection(set1, set2) {
-    if (set1 === 'θ' || set2 === 'θ') {
-        return set1 === 'θ' ? set2 : set1;
-    }
+    // Jika salah satu adalah theta (θ), kembalikan set lainnya
+    if (set1 === 'θ') return set2;
+    if (set2 === 'θ') return set1;
 
-    if (set1 === set2) {
-        return set1;
-    }
+    // Ubah string menjadi array set
+    const set1Array = set1.split(',');
+    const set2Array = set2.split(',');
 
-    // Handle combined sets (e.g., "D1,D2")
-    const sets1 = set1.split(',');
-    const sets2 = set2.split(',');
-    const intersection = sets1.filter(x => sets2.includes(x));
+    // Dapatkan irisan
+    const intersection = set1Array.filter(x => set2Array.includes(x));
 
-    return intersection.length ? intersection.join(',') : null;
+    // Jika tidak ada irisan, kembalikan null (akan dihitung sebagai konflik)
+    if (intersection.length === 0) return null;
+
+    // Urutkan hasil irisan untuk konsistensi
+    return intersection.sort().join(',');
 }
 
 function displayResults(finalResult, calculationSteps) {
@@ -292,27 +309,46 @@ function displayResults(finalResult, calculationSteps) {
                 </ul>
             </div>
             <div class="space-y-4">
-                ${selectedSymptoms.map((symptom, index) => `
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <div class="flex items-center mb-2">
-                            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
-                                <span class="text-indigo-600 font-semibold">${index + 1}</span>
+                ${selectedSymptoms.map((symptom, index) => {
+                    // Determine the correct mass function notation based on total symptoms
+                    let massNotation;
+                    if (selectedSymptoms.length <= 2) {
+                        // For 2 symptoms: m1, m2
+                        massNotation = `m${index + 1}`;
+                    } else {
+                        // For 3+ symptoms: m1, m2, m4, m6, m8
+                        switch(index) {
+                            case 0: massNotation = 'm1'; break;
+                            case 1: massNotation = 'm2'; break;
+                            case 2: massNotation = 'm4'; break;
+                            case 3: massNotation = 'm6'; break;
+                            case 4: massNotation = 'm8'; break;
+                            default: massNotation = `m${index + 1}`;
+                        }
+                    }
+
+                    return `
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-indigo-600 font-semibold">${index + 1}</span>
+                                </div>
+                                <h4 class="font-medium text-gray-800">${getSymptomName(symptom)}</h4>
                             </div>
-                            <h4 class="font-medium text-gray-800">${getSymptomName(symptom)}</h4>
-                        </div>
-                        <div class="pl-11">
-                            <div class="text-sm text-gray-600 mb-2">Mass Function:</div>
-                            <div class="grid grid-cols-2 gap-4">
-                                ${Object.entries(massValues[symptom]).map(([key, value]) => `
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-mono">m(${key === 'θ' ? 'θ' : '{'+key+'}'})</span>
-                                        <span class="text-indigo-600">${value.toFixed(4)} (${(value * 100).toFixed(2)}%)</span>
-                                    </div>
-                                `).join('')}
+                            <div class="pl-11">
+                                <div class="text-sm text-gray-600 mb-2">Mass Function:</div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    ${Object.entries(massValues[symptom]).map(([key, value]) => `
+                                        <div class="flex justify-between items-center">
+                                            <span class="font-mono">${massNotation}({${key === 'θ' ? 'θ' : key}})</span>
+                                            <span class="text-indigo-600">${value.toFixed(4)} (${(value * 100).toFixed(2)}%)</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
         </div>
     `;
@@ -408,26 +444,22 @@ function displayResults(finalResult, calculationSteps) {
 
     // Display calculation steps starting from step 2 (combinations)
     calculationSteps.forEach((step, index) => {
-        if (index > 0) { // Skip the first step since it's now part of symptomsInfo
+        if (index > 0) {
             const stepDiv = document.createElement('div');
             stepDiv.className = 'calculation-step bg-gray-50 rounded-xl p-6 space-y-4 mb-8';
 
-            // Combination steps with detailed explanation
-            const prevStep = calculationSteps[index - 1];
             const currentGejala = step.description.split(' ').pop();
-            const prevGejala = prevStep.description.split(' ').pop();
-            const currentMass = massValues[currentGejala];
-            const prevMass = prevStep.values;
+            const stepNumber = index + 1;
 
-            // Calculate combinations and conflicts
+            // Calculate combinations and conflicts for current step
             let combinations = [];
             let conflicts = [];
             let totalConflict = 0;
 
-            for (const key1 in prevMass) {
-                for (const key2 in currentMass) {
+            for (const key1 in step.prevValues) {
+                for (const key2 in step.currentValues) {
                     const intersection = getIntersection(key1, key2);
-                    const product = prevMass[key1] * currentMass[key2];
+                    const product = step.prevValues[key1] * step.currentValues[key2];
                     
                     if (intersection === null) {
                         conflicts.push({
@@ -448,7 +480,6 @@ function displayResults(finalResult, calculationSteps) {
             }
 
             const normalizationFactor = 1 / (1 - totalConflict);
-            const stepNumber = index + 1;
 
             stepDiv.innerHTML = `
                 <div class="step-header text-lg font-semibold text-purple-700 mb-4">
@@ -456,33 +487,38 @@ function displayResults(finalResult, calculationSteps) {
                 </div>
 
                 <div class="bg-white rounded-lg p-4 shadow-sm mb-6">
-                    <div class="text-sm font-medium text-gray-700 mb-3">1. Membuat Tabel Kombinasi m${stepNumber-1} × m${stepNumber}:</div>
+                    <div class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-table text-purple-600 mr-2"></i>
+                        ${getTableTitle(stepNumber, selectedSymptoms.length)}
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full border-collapse">
                             <thead>
                                 <tr>
-                                    <th class="px-4 py-2 border bg-gray-50">m${stepNumber-1} × m${stepNumber}</th>
-                                    ${Object.entries(currentMass).map(([key, value]) => 
+                                    <th class="px-4 py-2 border bg-gray-50">
+                                        ${getMassNotation(stepNumber, selectedSymptoms.length)}
+                                    </th>
+                                    ${Object.entries(step.currentValues).map(([key, value]) => 
                                         `<th class="px-4 py-2 border bg-gray-50">
-                                            m${stepNumber}({${key === 'θ' ? 'θ' : key}}) = ${value.toFixed(4)}
+                                            ${getCurrentMassNotation(stepNumber, selectedSymptoms.length)}({${key === 'θ' ? 'θ' : key}}) = ${value.toFixed(4)}
                                         </th>`
                                     ).join('')}
                                 </tr>
                             </thead>
-                            <tbody>
-                                ${Object.entries(prevMass).map(([key1, value1]) => `
+                            <tbody class="text-sm">
+                                ${Object.entries(step.prevValues).map(([key1, value1]) => `
                                     <tr>
                                         <td class="px-4 py-2 border font-medium bg-gray-50">
-                                            m${stepNumber-1}({${key1 === 'θ' ? 'θ' : key1}}) = ${value1.toFixed(4)}
+                                            ${getPreviousMassNotation(stepNumber, selectedSymptoms.length)}({${key1 === 'θ' ? 'θ' : key1}}) = ${value1.toFixed(4)}
                                         </td>
-                                        ${Object.entries(currentMass).map(([key2, value2]) => {
+                                        ${Object.entries(step.currentValues).map(([key2, value2]) => {
                                             const intersection = getIntersection(key1, key2);
                                             const product = value1 * value2;
                                             return `
                                                 <td class="px-4 py-2 border">
-                                                    <div class="text-sm">
+                                                    <div>
                                                         <div class="font-medium">{${intersection ? intersection : '∅'}}</div>
-                                                        <div class="text-gray-600">${value1.toFixed(4)} × ${value2.toFixed(4)} = ${product.toFixed(4)}</div>
+                                                        <div class="text-gray-600">${product.toFixed(4)}</div>
                                                     </div>
                                                 </td>
                                             `;
@@ -495,46 +531,60 @@ function displayResults(finalResult, calculationSteps) {
                 </div>
 
                 <div class="bg-white rounded-lg p-4 shadow-sm mb-6">
-                    <div class="text-sm font-medium text-gray-700 mb-3">2. Menghitung Nilai Konflik (K):</div>
+                    <div class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
+                        2. Menghitung Nilai Konflik (K):
+                    </div>
                     <div class="pl-4 border-l-4 border-red-200">
                         <p class="mb-2 text-sm text-gray-600">K adalah jumlah dari hasil perkalian elemen yang beririsan kosong (∅):</p>
-                        <div class="bg-red-50 p-3 rounded-lg">
-                            ${conflicts.map(c => 
-                                `<div class="mb-1">m${stepNumber-1}({${c.m1}}) × m${stepNumber}({${c.m2}}) = ${c.value.toFixed(4)}</div>`
-                            ).join(' + ')}
-                            <div class="mt-2 font-medium border-t border-red-200 pt-2">
-                                K = ${conflicts.map(c => c.value.toFixed(4)).join(' + ')} = ${totalConflict.toFixed(4)}
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <div class="font-mono">
+                                K = ${conflicts.map(c => `${c.value.toFixed(4)}`).join(' + ')} = ${totalConflict.toFixed(4)}
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-lg p-4 shadow-sm mb-6">
-                    <div class="text-sm font-medium text-gray-700 mb-3">3. Menghitung Faktor Normalisasi:</div>
+                    <div class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-calculator text-blue-600 mr-2"></i>
+                        3. Menghitung Faktor Normalisasi:
+                    </div>
                     <div class="pl-4 border-l-4 border-blue-200">
-                        <div class="bg-blue-50 p-3 rounded-lg">
-                            <div class="mb-2">Faktor normalisasi = 1 / (1 - K)</div>
-                            <div class="mb-2">= 1 / (1 - ${totalConflict.toFixed(4)})</div>
-                            <div class="font-medium">= ${normalizationFactor.toFixed(4)}</div>
+                        <div class="bg-blue-50 p-4 rounded-lg space-y-2">
+                            <div class="font-mono">
+                                1/(1-K) = 1/(1-${totalConflict.toFixed(4)})
+                            </div>
+                            <div class="font-mono">
+                                = 1/${(1-totalConflict).toFixed(4)}
+                            </div>
+                            <div class="font-mono font-semibold">
+                                = ${normalizationFactor.toFixed(4)}
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <div class="text-sm font-medium text-gray-700 mb-3">4. Menghitung Mass Function Baru:</div>
-                    <div class="pl-4 border-l-4 border-green-200">
+                    <div class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-calculator text-green-600 mr-2"></i>
+                        4. Menghitung Mass Function Baru
+                    </div>
+                    <div class="pl-4 border-l-4 border-blue-200 mb-4">
+                        <p class="text-gray-600 mb-2">Menghitung mass function baru dengan cara:</p>
+                        <ol class="list-decimal pl-4 text-gray-600 space-y-2">
+                            <li>Mengkombinasikan nilai mass function dari hasil perhitungan tabel untuk mendapatkan ${getNextMassNotation(stepNumber, selectedSymptoms.length)}</li>
+                            <li>Hasil kombinasi tersebut dikalikan dengan nilai Faktor Normalisasi</li>
+                        </ol>
+                    </div>
+                    <div class="space-y-4">
                         ${Object.entries(step.values).map(([key, value]) => {
-                            const preNormalizedValue = value / normalizationFactor;
-                            
-                            // Get all combinations that result in this key
                             let combinations = [];
-                            for (const [k1, v1] of Object.entries(prevMass)) {
-                                for (const [k2, v2] of Object.entries(currentMass)) {
+                            for (const [k1, v1] of Object.entries(step.prevValues)) {
+                                for (const [k2, v2] of Object.entries(step.currentValues)) {
                                     const intersection = getIntersection(k1, k2);
                                     if (intersection === key) {
                                         combinations.push({
-                                            m1: k1,
-                                            m2: k2,
                                             value: v1 * v2
                                         });
                                     }
@@ -542,32 +592,25 @@ function displayResults(finalResult, calculationSteps) {
                             }
                             
                             return `
-                                <div class="mb-6 bg-green-50 p-3 rounded-lg">
-                                    <div class="font-medium mb-2">m${stepNumber}({${key === 'θ' ? 'θ' : key}}):</div>
-                                    <div class="space-y-2">
-                                        <div class="ml-4">
-                                            <div class="mb-1">Penjumlahan irisan yang menghasilkan {${key === 'θ' ? 'θ' : key}}:</div>
-                                            ${combinations.map((c, idx) => 
-                                                `<div class="text-gray-600">
-                                                    ${idx > 0 ? ' + ' : ''}(m${stepNumber-1}({${c.m1}}) × m${stepNumber}({${c.m2}})) = ${c.value.toFixed(4)}
-                                                </div>`
-                                            ).join('')}
-                                            <div class="mt-2 font-medium">Total = ${preNormalizedValue.toFixed(4)}</div>
-                                        </div>
-                                        <div class="ml-4 pt-2 border-t border-green-200">
-                                            <div class="mb-1">Normalisasi:</div>
-                                            <div class="text-gray-600">${preNormalizedValue.toFixed(4)} × ${normalizationFactor.toFixed(4)} = ${value.toFixed(4)}</div>
-                                            <div class="text-indigo-600 font-medium mt-1">Hasil akhir = ${(value * 100).toFixed(2)}%</div>
-                                        </div>
+                                <div class="bg-green-50 p-4 rounded-lg">
+                                    <div class="font-mono">
+                                        ${getNextMassNotation(stepNumber, selectedSymptoms.length)}({${key === 'θ' ? 'θ' : key}}) = ${combinations.length > 1 ? '(' : ''}${combinations.map(c => c.value.toFixed(4)).join(' + ')}${combinations.length > 1 ? ')' : ''} × ${normalizationFactor.toFixed(4)} = ${value.toFixed(4)}
                                     </div>
                                 </div>
                             `;
                         }).join('')}
-                        <div class="mt-4 pt-4 border-t border-gray-200">
-                            <div class="font-medium">Verifikasi Total = 100%:</div>
-                            <div class="pl-4 mt-2 text-gray-600">
-                                ${Object.values(step.values).map(v => (v * 100).toFixed(2) + '%').join(' + ')} = 100%
-                            </div>
+                    </div>
+
+                    <div class="mt-6 bg-indigo-50 p-4 rounded-lg">
+                        <div class="font-medium text-gray-800 mb-2">
+                            <i class="fas fa-check-circle text-indigo-600 mr-2"></i>
+                            Verifikasi Total Mass Function ${getNextMassNotation(stepNumber, selectedSymptoms.length)}
+                        </div>
+                        <div class="text-gray-600 mb-2">
+                            Jumlah seluruh mass function ${getNextMassNotation(stepNumber, selectedSymptoms.length)} harus sama dengan 1 (100%):
+                        </div>
+                        <div class="pl-4 font-mono text-gray-800">
+                            ${Object.values(step.values).map(v => (v * 100).toFixed(2) + '%').join(' + ')} = 100%
                         </div>
                     </div>
                 </div>
@@ -587,21 +630,17 @@ function displayResults(finalResult, calculationSteps) {
         </div>
 
         <div class="bg-white rounded-lg p-4 shadow-sm mb-6">
-            <div class="text-sm text-gray-600 mb-3">Perhitungan Nilai Belief:</div>
+            <div class="text-lg font-semibold text-gray-800 mb-4">Perhitungan Nilai Belief:</div>
             <div class="pl-4 border-l-4 border-blue-200">
                 <p class="mb-2 text-sm text-gray-600">Belief adalah jumlah dari seluruh mass function yang hanya mengarah ke satu penyakit tertentu:</p>
                 ${Object.entries(beliefs).map(([disease, value]) => {
-                    const relevantMasses = [];
-                    for (const [key, mass] of Object.entries(finalResult)) {
-                        if (key.split(',').length === 1 && key !== 'θ' && key === disease) {
-                            relevantMasses.push(`m${calculationSteps.length}(${key}) = ${mass.toFixed(4)}`);
-                        }
-                    }
+                    // Get the correct mass notation based on number of symptoms
+                    const massNotation = getFinalMassNotation(selectedSymptoms.length);
                     return `
                         <div class="mb-4">
                             <div class="font-medium mb-2">Bel(${disease}):</div>
-                            <div class="pl-4">
-                                ${relevantMasses.join(' + ')} = ${value.toFixed(4)} = ${(value * 100).toFixed(2)}%
+                            <div class="pl-4 font-mono">
+                                ${massNotation}(${disease}) = ${value.toFixed(4)} = ${(value * 100).toFixed(2)}%
                             </div>
                         </div>
                     `;
@@ -610,37 +649,46 @@ function displayResults(finalResult, calculationSteps) {
         </div>
 
         <div class="bg-white rounded-lg p-4 shadow-sm mb-6">
-            <div class="text-sm text-gray-600 mb-3">Perhitungan Nilai Plausibility:</div>
-            <div class="pl-4 border-l-4 border-green-200">
+            <div class="text-lg font-semibold text-gray-800 mb-4">Perhitungan Nilai Plausibility:</div>
+            <div class="pl-4 border-l-4 border-blue-200">
                 <p class="mb-2 text-sm text-gray-600">Plausibility adalah jumlah dari seluruh mass function yang memungkinkan mengarah ke penyakit tertentu:</p>
                 ${Object.entries(plausibilities).map(([disease, value]) => {
+                    const massNotation = getFinalMassNotation(selectedSymptoms.length);
+                    // Get all relevant mass functions for this disease
                     const relevantMasses = [];
+                    const relevantValues = [];
+                    
+                    // Add single disease mass
+                    if (finalResult[disease]) {
+                        relevantMasses.push(`${massNotation}(${disease})`);
+                        relevantValues.push(finalResult[disease].toFixed(4));
+                    }
+                    
+                    // Add combined masses
                     for (const [key, mass] of Object.entries(finalResult)) {
-                        if (key === 'θ' || key.split(',').includes(disease)) {
-                            relevantMasses.push(`m${calculationSteps.length}(${key === 'θ' ? 'θ' : '{'+key+'}'}) = ${mass.toFixed(4)}`);
+                        if (key !== disease && key !== 'θ' && key.split(',').includes(disease)) {
+                            relevantMasses.push(`${massNotation}(${key})`);
+                            relevantValues.push(mass.toFixed(4));
                         }
                     }
+                    
+                    // Add theta
+                    if (finalResult['θ']) {
+                        relevantMasses.push(`${massNotation}(θ)`);
+                        relevantValues.push(finalResult['θ'].toFixed(4));
+                    }
+                    
                     return `
                         <div class="mb-4">
                             <div class="font-medium mb-2">Pl(${disease}):</div>
-                            <div class="pl-4">
-                                ${relevantMasses.join(' + ')} = ${value.toFixed(4)} = ${(value * 100).toFixed(2)}%
+                            <div class="pl-4 space-y-2 font-mono">
+                                <div>= ${relevantMasses.join(' + ')}</div>
+                                <div>= ${relevantValues.join(' + ')} = ${value.toFixed(4)}</div>
+                                <div>= ${(value * 100).toFixed(2)}%</div>
                             </div>
                         </div>
                     `;
                 }).join('')}
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg p-4 shadow-sm mt-6">
-            <div class="text-sm text-gray-600 mb-3">Kesimpulan:</div>
-            <div class="text-gray-800">
-                Berdasarkan perhitungan di atas, pasien kemungkinan besar menderita penyakit 
-                <span class="font-semibold text-indigo-600">${diseases[highestBeliefDisease]}</span> dengan:
-                <ul class="list-disc pl-5 mt-2">
-                    <li>Nilai Belief: ${(highestBeliefValue * 100).toFixed(2)}%</li>
-                    <li>Nilai Plausibility: ${(plausibilities[highestBeliefDisease] * 100).toFixed(2)}%</li>
-                </ul>
             </div>
         </div>
     `;
@@ -668,8 +716,7 @@ function calculatePlausibilities(masses) {
     
     for (const disease in plausibilities) {
         for (const key in masses) {
-            const sets = key.split(',');
-            if (sets.includes(disease) || key === 'θ') {
+            if (key === 'θ' || key.split(',').includes(disease)) {
                 plausibilities[disease] += masses[key];
             }
         }
@@ -693,4 +740,60 @@ function resetForm() {
     document.getElementById('belief-values').innerHTML = '';
     document.getElementById('detailed-calculations').innerHTML = '';
 }
+
+// Add helper functions for mass function notation
+function getTableTitle(stepNumber, totalSymptoms) {
+    const nextMass = getNextMassNotation(stepNumber, totalSymptoms);
+    const prevMass = getPreviousMassNotation(stepNumber, totalSymptoms);
+    const currentMass = getCurrentMassNotation(stepNumber, totalSymptoms);
+    return `1. Membuat Tabel ${nextMass} dari Kombinasi ${prevMass} × ${currentMass}:`;
+}
+
+function getMassNotation(stepNumber, totalSymptoms) {
+    const prevMass = getPreviousMassNotation(stepNumber, totalSymptoms);
+    const currentMass = getCurrentMassNotation(stepNumber, totalSymptoms);
+    return `${prevMass} × ${currentMass}`;
+}
+
+function getPreviousMassNotation(stepNumber, totalSymptoms) {
+    if (totalSymptoms <= 2) {
+        return `m${stepNumber-1}`;
+    }
+    // For 3+ symptoms: m1→m3→m5→m7
+    return `m${stepNumber * 2 - 3}`;
+}
+
+function getCurrentMassNotation(stepNumber, totalSymptoms) {
+    if (totalSymptoms <= 2) {
+        return `m${stepNumber}`;
+    }
+    // For 3+ symptoms: m2→m4→m6→m8
+    switch(stepNumber) {
+        case 2: return 'm2';
+        case 3: return 'm4';
+        case 4: return 'm6';
+        case 5: return 'm8';
+        default: return `m${stepNumber}`;
+    }
+}
+
+function getNextMassNotation(stepNumber, totalSymptoms) {
+    if (totalSymptoms <= 2) {
+        return `m${stepNumber+1}`;
+    }
+    // For 3+ symptoms: m3→m5→m7→m9
+    return `m${stepNumber * 2 - 1}`;
+}
+
+// Add helper function to get final mass notation
+function getFinalMassNotation(totalSymptoms) {
+    switch(totalSymptoms) {
+        case 2: return 'm3';
+        case 3: return 'm5';
+        case 4: return 'm7';
+        case 5: return 'm9';
+        default: return 'm3';
+    }
+}
+
 
