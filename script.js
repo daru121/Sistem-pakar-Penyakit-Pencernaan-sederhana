@@ -1,4 +1,4 @@
-// Mass function values for each symptom
+// nilai fungsi massa untuk setiap gejala
 const massValues = {
     G1: {
         D1: 0.6,
@@ -30,27 +30,27 @@ const massValues = {
     }
 };
 
-// Disease names mapping
+// nama penyakit
 const diseases = {
     D1: "Gastritis",
     D2: "Gastritis Kronis",
     D3: "Infeksi Usus"
 };
 
-// Initialize the page
+// Inisialisasi halaman
 document.addEventListener('DOMContentLoaded', function() {
     populateMassFunctionTable();
     document.getElementById('diagnose').addEventListener('click', performDiagnosis);
     document.getElementById('reset').addEventListener('click', resetForm);
     
-    // Add modal event listeners
+    // Menambahkan event listener untuk modal
     document.getElementById('showCalculations').addEventListener('click', showCalculationModal);
     document.getElementById('closeModal').addEventListener('click', hideCalculationModal);
     document.getElementById('calculationModal').addEventListener('click', function(e) {
         if (e.target === this) hideCalculationModal();
     });
 
-    // Add alert modal event listeners
+    // Menambahkan event listener untuk modal peringatan
     document.getElementById('closeAlert').addEventListener('click', hideAlertModal);
     document.getElementById('alertModal').addEventListener('click', function(e) {
         if (e.target === this) hideAlertModal();
@@ -71,7 +71,7 @@ function hideCalculationModal() {
     document.body.style.overflow = '';
 }
 
-// Show alert modal
+// Menampilkan modal peringatan
 function showAlertModal() {
     const modal = document.getElementById('alertModal');
     modal.classList.remove('hidden');
@@ -79,7 +79,7 @@ function showAlertModal() {
     document.body.style.overflow = 'hidden';
 }
 
-// Hide alert modal
+// Menyembunyikan modal peringatan
 function hideAlertModal() {
     const modal = document.getElementById('alertModal');
     modal.classList.remove('flex');
@@ -87,24 +87,23 @@ function hideAlertModal() {
     document.body.style.overflow = '';
 }
 
-// Populate mass function table
+// Mengisi tabel fungsi massa
 function populateMassFunctionTable() {
     const tbody = document.getElementById('mass-function-table');
     
-    // Clear any existing content
+    // Membersihkan konten yang ada
     tbody.innerHTML = '';
     
-    // Add data rows
+    // Menambahkan baris data
     for (const symptom in massValues) {
         const row = document.createElement('tr');
         
-        // Symptom name cell
+        // Sel nama gejala
         const symptomCell = document.createElement('td');
         symptomCell.textContent = getSymptomName(symptom);
         symptomCell.className = 'text-left px-4 py-2 border';
         row.appendChild(symptomCell);
         
-        // Mass function values for each disease
         const columns = ['D1', 'D2', 'D3', 'D1,D2', 'D1,D3', 'D2,D3', 'θ'];
         columns.forEach(key => {
             const cell = document.createElement('td');
@@ -129,7 +128,7 @@ function getSymptomName(code) {
     return `${code} - ${symptoms[code]}`;
 }
 
-// Add these functions at the top level
+// Tambahkan fungsi ini di tingkat atas
 function showLoading() {
     const loadingContainer = document.querySelector('.loading-container');
     const loadingBar = document.querySelector('.loading-bar');
@@ -155,7 +154,7 @@ function hideLoading() {
     loadingContainer.style.display = 'none';
 }
 
-// Update the performDiagnosis function
+// Update fungsi performDiagnosis
 function performDiagnosis() {
     const selectedSymptoms = Array.from(document.querySelectorAll('.symptom-checkbox:checked'))
         .map(checkbox => checkbox.id);
@@ -165,18 +164,18 @@ function performDiagnosis() {
         return;
     }
 
-    // Hide previous results
+    // Sembunyikan hasil sebelumnya
     document.getElementById('result').classList.add('hidden');
     
-    // Show loading
+    // Tampilkan loading
     showLoading();
 
-    // Simulate processing time for better UX
+    // Simulasi waktu proses untuk UX yang lebih baik
     setTimeout(() => {
         let result = null;
         let calculationSteps = [];
 
-        // Perform calculations with correct mass function numbering
+        // Lakukan perhitungan dengan nomor fungsi massa yang benar
         selectedSymptoms.forEach((symptom, index) => {
             if (index === 0) {
                 result = { ...massValues[symptom] };
@@ -189,12 +188,12 @@ function performDiagnosis() {
                 const prevResult = { ...result };
                 result = combineEvidence(prevResult, massValues[symptom]);
                 
-                // Calculate the correct step number based on the pattern
+                // Hitung nomor langkah yang benar berdasarkan pola
                 let stepNumber;
                 if (selectedSymptoms.length <= 2) {
                     stepNumber = index + 1;
                 } else {
-                    // For 3+ symptoms: steps will be 3, 5, 7, 9
+                    // Untuk 3+ gejala: langkah akan menjadi 3, 5, 7, 9
                     stepNumber = index * 2 + 1;
                 }
 
@@ -208,11 +207,11 @@ function performDiagnosis() {
             }
         });
 
-        // Hide loading and show results
+        // Sembunyikan loading dan tampilkan hasil
         hideLoading();
         displayResults(result, calculationSteps);
         
-        // Show results with animation
+        // Tampilkan hasil dengan animasi
         const resultSection = document.getElementById('result');
         resultSection.classList.remove('hidden');
         resultSection.style.opacity = '0';
@@ -221,7 +220,7 @@ function performDiagnosis() {
         // Trigger reflow
         resultSection.offsetHeight;
         
-        // Add animation
+        // Tambahkan animasi
         resultSection.style.transition = 'all 0.6s ease-out';
         resultSection.style.opacity = '1';
         resultSection.style.transform = 'translateY(0)';
@@ -232,7 +231,7 @@ function combineEvidence(mass1, mass2) {
     const result = {};
     let conflictSum = 0;
 
-    // Calculate intersections and conflicts
+    // Hitung irisan dan konflik
     for (const key1 in mass1) {
         for (const key2 in mass2) {
             const intersection = getIntersection(key1, key2);
@@ -246,8 +245,8 @@ function combineEvidence(mass1, mass2) {
         }
     }
 
-    // Normalize results
-    if (conflictSum !== 1) {  // Add check to prevent division by zero
+    // Normalisasi hasil
+    if (conflictSum !== 1) {  // Tambahkan pengecekan untuk menghindari pembagian dengan nol
         const normalizationFactor = 1 / (1 - conflictSum);
         for (const key in result) {
             result[key] *= normalizationFactor;
@@ -277,21 +276,21 @@ function getIntersection(set1, set2) {
 }
 
 function displayResults(finalResult, calculationSteps) {
-    // Display diagnosis result
+    // Tampilkan hasil diagnosis
     const diagnosisResult = document.getElementById('diagnosis-result');
     const beliefValues = document.getElementById('belief-values');
     const detailedCalculations = document.getElementById('detailed-calculations');
 
-    // Clear previous results
+    // Membersihkan hasil sebelumnya
     diagnosisResult.innerHTML = '';
     beliefValues.innerHTML = '';
     detailedCalculations.innerHTML = '';
 
-    // Get selected symptoms
+    // Dapatkan gejala yang dipilih
     const selectedSymptoms = Array.from(document.querySelectorAll('.symptom-checkbox:checked'))
         .map(checkbox => checkbox.id);
 
-    // Add selected symptoms information as Step 1
+    // Tambahkan informasi gejala yang dipilih sebagai Langkah 1
     const symptomsInfo = document.createElement('div');
     symptomsInfo.className = 'calculation-step bg-gray-50 rounded-xl p-6 space-y-4 mb-8';
     symptomsInfo.innerHTML = `
@@ -310,13 +309,13 @@ function displayResults(finalResult, calculationSteps) {
             </div>
             <div class="space-y-4">
                 ${selectedSymptoms.map((symptom, index) => {
-                    // Determine the correct mass function notation based on total symptoms
+                    // Tentukan notasi fungsi massa yang benar berdasarkan total gejala
                     let massNotation;
                     if (selectedSymptoms.length <= 2) {
-                        // For 2 symptoms: m1, m2
+                        // Untuk 2 gejala: m1, m2
                         massNotation = `m${index + 1}`;
                     } else {
-                        // For 3+ symptoms: m1, m2, m4, m6, m8
+                        // Untuk 3+ gejala: m1, m2, m4, m6, m8
                         switch(index) {
                             case 0: massNotation = 'm1'; break;
                             case 1: massNotation = 'm2'; break;
@@ -354,15 +353,15 @@ function displayResults(finalResult, calculationSteps) {
     `;
     detailedCalculations.appendChild(symptomsInfo);
 
-    // Calculate beliefs and plausibilities
+    // Hitung nilai belief dan plausibility
     const beliefs = calculateBeliefs(finalResult);
     const plausibilities = calculatePlausibilities(finalResult);
 
-    // Find the disease with highest belief
+    // Dapatkan penyakit dengan nilai belief tertinggi
     const [highestBeliefDisease, highestBeliefValue] = Object.entries(beliefs)
         .reduce((max, [disease, belief]) => belief > max[1] ? [disease, belief] : max, ['', 0]);
 
-    // Create diagnosis result HTML with enhanced styling
+    // Buat hasil diagnosis dengan gaya yang diperbaiki
     diagnosisResult.innerHTML = `
         <div class="diagnosis-card">
             <div class="diagnosis-header">
@@ -389,7 +388,7 @@ function displayResults(finalResult, calculationSteps) {
         </div>
     `;
 
-    // Create belief and plausibility values HTML with enhanced styling
+    // Buat nilai belief dan plausibility dengan gaya yang diperbaiki
     beliefValues.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white rounded-xl p-6 shadow-sm relative overflow-hidden">
@@ -442,7 +441,7 @@ function displayResults(finalResult, calculationSteps) {
         </div>
     `;
 
-    // Display calculation steps starting from step 2 (combinations)
+    // Tampilkan langkah perhitungan mulai dari Langkah 2 (kombinasi)
     calculationSteps.forEach((step, index) => {
         if (index > 0) {
             const stepDiv = document.createElement('div');
@@ -451,7 +450,7 @@ function displayResults(finalResult, calculationSteps) {
             const currentGejala = step.description.split(' ').pop();
             const stepNumber = index + 1;
 
-            // Calculate combinations and conflicts for current step
+            // Hitung kombinasi dan konflik untuk langkah saat ini
             let combinations = [];
             let conflicts = [];
             let totalConflict = 0;
@@ -620,7 +619,7 @@ function displayResults(finalResult, calculationSteps) {
         }
     });
 
-    // Add final step in detailed calculations using the same beliefs and plausibilities
+    // Tambahkan langkah akhir dalam perhitungan detail menggunakan nilai belief dan plausibility yang sama
     const finalStep = document.createElement('div');
     finalStep.className = 'calculation-step bg-gray-50 rounded-xl p-6 space-y-4';
     
@@ -634,7 +633,7 @@ function displayResults(finalResult, calculationSteps) {
             <div class="pl-4 border-l-4 border-blue-200">
                 <p class="mb-2 text-sm text-gray-600">Belief adalah jumlah dari seluruh mass function yang hanya mengarah ke satu penyakit tertentu:</p>
                 ${Object.entries(beliefs).map(([disease, value]) => {
-                    // Get the correct mass notation based on number of symptoms
+                    // Dapatkan notasi fungsi massa yang benar berdasarkan jumlah gejala
                     const massNotation = getFinalMassNotation(selectedSymptoms.length);
                     return `
                         <div class="mb-4">
@@ -654,17 +653,17 @@ function displayResults(finalResult, calculationSteps) {
                 <p class="mb-2 text-sm text-gray-600">Plausibility adalah jumlah dari seluruh mass function yang memungkinkan mengarah ke penyakit tertentu:</p>
                 ${Object.entries(plausibilities).map(([disease, value]) => {
                     const massNotation = getFinalMassNotation(selectedSymptoms.length);
-                    // Get all relevant mass functions for this disease
+                    // Dapatkan semua fungsi massa yang relevan untuk penyakit ini
                     const relevantMasses = [];
                     const relevantValues = [];
                     
-                    // Add single disease mass
+                    // Tambahkan fungsi massa penyakit tunggal
                     if (finalResult[disease]) {
                         relevantMasses.push(`${massNotation}(${disease})`);
                         relevantValues.push(finalResult[disease].toFixed(4));
                     }
                     
-                    // Add combined masses
+                    // Tambahkan fungsi massa kombinasi
                     for (const [key, mass] of Object.entries(finalResult)) {
                         if (key !== disease && key !== 'θ' && key.split(',').includes(disease)) {
                             relevantMasses.push(`${massNotation}(${key})`);
@@ -672,7 +671,7 @@ function displayResults(finalResult, calculationSteps) {
                         }
                     }
                     
-                    // Add theta
+                    // Tambahkan fungsi massa θ
                     if (finalResult['θ']) {
                         relevantMasses.push(`${massNotation}(θ)`);
                         relevantValues.push(finalResult['θ'].toFixed(4));
@@ -725,23 +724,23 @@ function calculatePlausibilities(masses) {
     return plausibilities;
 }
 
-// Reset function
+// Reset fungsi
 function resetForm() {
-    // Reset all checkboxes
+    // Reset semua checkbox
     document.querySelectorAll('.symptom-checkbox').forEach(checkbox => {
         checkbox.checked = false;
     });
 
-    // Hide results sections
+    // Sembunyikan hasil bagian
     document.getElementById('result').classList.add('hidden');
 
-    // Clear results content
+    // Membersihkan konten hasil
     document.getElementById('diagnosis-result').innerHTML = '';
     document.getElementById('belief-values').innerHTML = '';
     document.getElementById('detailed-calculations').innerHTML = '';
 }
 
-// Add helper functions for mass function notation
+// Tambahkan fungsi helper untuk notasi fungsi massa
 function getTableTitle(stepNumber, totalSymptoms) {
     const nextMass = getNextMassNotation(stepNumber, totalSymptoms);
     const prevMass = getPreviousMassNotation(stepNumber, totalSymptoms);
@@ -759,7 +758,7 @@ function getPreviousMassNotation(stepNumber, totalSymptoms) {
     if (totalSymptoms <= 2) {
         return `m${stepNumber-1}`;
     }
-    // For 3+ symptoms: m1→m3→m5→m7
+    // Untuk 3+ gejala: m1→m3→m5→m7
     return `m${stepNumber * 2 - 3}`;
 }
 
@@ -767,7 +766,7 @@ function getCurrentMassNotation(stepNumber, totalSymptoms) {
     if (totalSymptoms <= 2) {
         return `m${stepNumber}`;
     }
-    // For 3+ symptoms: m2→m4→m6→m8
+    // Untuk 3+ gejala: m2→m4→m6→m8
     switch(stepNumber) {
         case 2: return 'm2';
         case 3: return 'm4';
@@ -781,11 +780,11 @@ function getNextMassNotation(stepNumber, totalSymptoms) {
     if (totalSymptoms <= 2) {
         return `m${stepNumber+1}`;
     }
-    // For 3+ symptoms: m3→m5→m7→m9
+    // Untuk 3+ gejala: m3→m5→m7→m9
     return `m${stepNumber * 2 - 1}`;
 }
 
-// Add helper function to get final mass notation
+// Tambahkan fungsi helper untuk mendapatkan notasi fungsi massa akhir
 function getFinalMassNotation(totalSymptoms) {
     switch(totalSymptoms) {
         case 2: return 'm3';
